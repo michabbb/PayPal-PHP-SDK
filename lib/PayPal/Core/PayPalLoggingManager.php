@@ -57,10 +57,15 @@ class PayPalLoggingManager
         $config = PayPalConfigManager::getInstance()->getConfigHashmap();
         // Checks if custom factory defined, and is it an implementation of @PayPalLogFactory
         $factory = array_key_exists('log.AdapterFactory', $config) && in_array('PayPal\Log\PayPalLogFactory', class_implements($config['log.AdapterFactory'])) ? $config['log.AdapterFactory'] : '\PayPal\Log\PayPalDefaultLogFactory';
-        /** @var PayPalLogFactory $factoryInstance */
-        $factoryInstance = new $factory();
-        $this->logger = $factoryInstance->getLogger($loggerName);
-        $this->loggerName = $loggerName;
+        $Logger = array_key_exists('log.Logger', $config) ? $config['log.Logger'] : '';
+        if ($Logger) {
+            $this->logger = $Logger;
+        } else {
+            /** @var PayPalLogFactory $factoryInstance */
+            $factoryInstance  = new $factory();
+            $this->logger     = $factoryInstance->getLogger($loggerName);
+            $this->loggerName = $loggerName;
+        }
     }
 
     /**
@@ -112,8 +117,8 @@ class PayPalLoggingManager
     {
         $config = PayPalConfigManager::getInstance()->getConfigHashmap();
         // Disable debug in live mode.
-        if (array_key_exists('mode', $config) && $config['mode'] != 'live') {
+//        if (array_key_exists('mode', $config) && $config['mode'] != 'live') {
             $this->logger->debug($message);
-        }
+//        }
     }
 }
